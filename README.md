@@ -19,5 +19,5 @@
 ---
 
 ## Update beta 0.2: 
-+ updated graphics
++ updated graphic design
 + added random game selection

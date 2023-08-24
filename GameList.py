@@ -2,7 +2,6 @@ import pickle
 from colorama import init, Fore, Style
 import random
 
-
 init()
 
 class Game:
@@ -13,6 +12,7 @@ class Game:
 class GameList:
     def __init__(self):
         self.games = []
+
 
     def add_game(self, title):
         game = Game(title)
@@ -41,12 +41,17 @@ class GameList:
             return None  
         return random.choice(uncompleted_games)
 
+    def sort_by_status(self):
+        sorted_games = sorted(self.games, key=lambda game: (game.completed, game.title))
+        return sorted_games
+
     def display_list(self):
         if not self.games:
             print(Fore.LIGHTBLACK_EX + "Список игр пуст." + Style.RESET_ALL)
         else:
-            print(Fore.YELLOW + "Список игр:" + Style.RESET_ALL)
-            for game in self.games:
+            print(Fore.YELLOW + "Список игр (по статусу):" + Style.RESET_ALL)
+            sorted_games = self.sort_by_status()
+            for game in sorted_games:
                 status = Fore.LIGHTGREEN_EX + "Пройдено" + Style.RESET_ALL if game.completed else Fore.LIGHTRED_EX +  "Не пройдено" + Style.RESET_ALL
                 print(f"- {game.title} ({status})")
 
@@ -63,6 +68,11 @@ class GameList:
         except FileNotFoundError:
             print(Fore.RED + "Файл со списком игр не найден." + Style.RESET_ALL)
 
+
+    def sort_by_title(self):
+        sorted_games = sorted(self.games, key=lambda game: game.title.lower())
+        return sorted_games
+
 def main():
     game_list = GameList()
 
@@ -73,10 +83,11 @@ def main():
         print(Fore.BLUE + "\nВыберите действие:" + Style.RESET_ALL)
         print("1. Добавить игру")
         print("2. Отметить игру как пройденную")
-        print("3. Показать список игр")
-        print("4. Удалить игру из списка")
-        print("5. Выбрать рандомную игру")
-        print("6. Сохранить и выйти")
+        print("3. Показать список игр (по статусу и алфавиту)")
+        print("4. Показать список игр (по алфавиту)")
+        print("5. Удалить игру из списка")
+        print("6. Выбрать рандомную игру")
+        print("7. Сохранить и выйти")
 
         choice = input(Fore.BLUE + "Введите номер действия: " + Style.RESET_ALL)
 
@@ -92,17 +103,23 @@ def main():
             game_list.display_list()
 
         elif choice == "4":
+            sorted_games = game_list.sort_by_title()
+            for game in sorted_games:
+                status = Fore.LIGHTGREEN_EX + "Пройдено" + Style.RESET_ALL if game.completed else Fore.LIGHTRED_EX +  "Не пройдено" + Style.RESET_ALL
+                print(f"- {game.title} ({status})")
+
+        elif choice == "5":
             title = input("Введите название игры, которую хотите удалить: ")
             game_list.remove_game(title)
 
-        elif choice == "5":
+        elif choice == "6":
             uncompleted_game = game_list.get_random_uncompleted_game()
             if uncompleted_game:
                 print(Fore.CYAN + "Выбрана случайная не пройденная игра: " + Style.RESET_ALL + Fore.MAGENTA + f"{uncompleted_game.title}" + Style.RESET_ALL)
             else:
                 print(Fore.YELLOW + "Все игры пройдены или список пуст." + Style.RESET_ALL)
 
-        elif choice == "6":
+        elif choice == "7":
             game_list.save_to_file(filename)
             print(Fore.MAGENTA + "Программа завершена." + Style.RESET_ALL)
             break

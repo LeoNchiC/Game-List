@@ -18,6 +18,14 @@
 
 ---
 
+## Update beta 0.3:
++ Added alphabetical sorting
++ Added sorting by alphabet and status
+
+
+
 ## Update beta 0.2: 
 + updated graphic design
 + added random game selection
+  
+

@@ -18,6 +18,11 @@
 
 ---
 
+## Update beta 0.4:
++ Designed using the library Tkinter
+
+
+
 ## Update beta 0.3:
 + Added alphabetical sorting
 + Added sorting by alphabet and status

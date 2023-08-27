@@ -1,6 +1,8 @@
 import pickle
-from colorama import init, Fore, Style
 import random
+import tkinter as tk
+from tkinter import simpledialog, messagebox
+from colorama import init, Fore, Style
 
 init()
 
@@ -13,17 +15,14 @@ class GameList:
     def __init__(self):
         self.games = []
 
-
     def add_game(self, title):
-        game = Game(title)
-        self.games.append(game)
-        print(Fore.GREEN + f"Игра '{title}' добавлена в список."+ Style.RESET_ALL)
+        self.games.append(Game(title))
 
     def mark_completed(self, title):
         for game in self.games:
             if game.title == title:
                 game.completed = True
-                print(Fore.GREEN + f"Игра '{title}' отмечена как пройденная."+ Style.RESET_ALL)
+                print(Fore.GREEN + f"Игра '{title}' отмечена как пройденная." + Style.RESET_ALL)
                 return
         print(Fore.RED + f"Игра '{title}' не найдена в списке." + Style.RESET_ALL)
 
@@ -38,7 +37,7 @@ class GameList:
     def get_random_uncompleted_game(self):
         uncompleted_games = [game for game in self.games if not game.completed]
         if not uncompleted_games:
-            return None  
+            return None
         return random.choice(uncompleted_games)
 
     def sort_by_status(self):
@@ -52,7 +51,7 @@ class GameList:
             print(Fore.YELLOW + "Список игр (по статусу):" + Style.RESET_ALL)
             sorted_games = self.sort_by_status()
             for game in sorted_games:
-                status = Fore.LIGHTGREEN_EX + "Пройдено" + Style.RESET_ALL if game.completed else Fore.LIGHTRED_EX +  "Не пройдено" + Style.RESET_ALL
+                status = Fore.LIGHTGREEN_EX + "Пройдено" + Style.RESET_ALL if game.completed else Fore.LIGHTRED_EX + "Не пройдено" + Style.RESET_ALL
                 print(f"- {game.title} ({status})")
 
     def save_to_file(self, filename):
@@ -68,63 +67,72 @@ class GameList:
         except FileNotFoundError:
             print(Fore.RED + "Файл со списком игр не найден." + Style.RESET_ALL)
 
-
     def sort_by_title(self):
         sorted_games = sorted(self.games, key=lambda game: game.title.lower())
         return sorted_games
 
-def main():
-    game_list = GameList()
+class GameListApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Менеджер списка игр")
 
-    filename = "gamelist.dat"
-    game_list.load_from_file(filename)
+        self.game_list = GameList()
 
-    while True:
-        print(Fore.BLUE + "\nВыберите действие:" + Style.RESET_ALL)
-        print("1. Добавить игру")
-        print("2. Отметить игру как пройденную")
-        print("3. Показать список игр (по статусу и алфавиту)")
-        print("4. Показать список игр (по алфавиту)")
-        print("5. Удалить игру из списка")
-        print("6. Выбрать рандомную игру")
-        print("7. Сохранить и выйти")
+        self.filename = "gamelist.dat"
+        self.game_list.load_from_file(self.filename)
 
-        choice = input(Fore.BLUE + "Введите номер действия: " + Style.RESET_ALL)
+        self.label = tk.Label(root, text="Менеджер списка игр", font=("Helvetica", 16, "bold"))
+        self.label.pack(pady=10)
 
-        if choice == "1":
-            title = input("Введите название игры: ")
-            game_list.add_game(title)
+        self.add_button = tk.Button(root, text="Добавить игру", command=self.add_game)
+        self.add_button.pack()
 
-        elif choice == "2":
-            title = input("Введите название игры, которую хотите отметить как пройденную: ")
-            game_list.mark_completed(title)
+        self.mark_button = tk.Button(root, text="Отметить как пройденную", command=self.mark_completed)
+        self.mark_button.pack()
 
-        elif choice == "3":
-            game_list.display_list()
+        self.show_button = tk.Button(root, text="Показать список", command=self.display_list)
+        self.show_button.pack()
 
-        elif choice == "4":
-            sorted_games = game_list.sort_by_title()
-            for game in sorted_games:
-                status = Fore.LIGHTGREEN_EX + "Пройдено" + Style.RESET_ALL if game.completed else Fore.LIGHTRED_EX +  "Не пройдено" + Style.RESET_ALL
-                print(f"- {game.title} ({status})")
+        self.random_button = tk.Button(root, text="Случайная непройденная игра", command=self.random_uncompleted_game)
+        self.random_button.pack()
 
-        elif choice == "5":
-            title = input("Введите название игры, которую хотите удалить: ")
-            game_list.remove_game(title)
+        self.quit_button = tk.Button(root, text="Сохранить и выйти", command=self.save_and_quit)
+        self.quit_button.pack()
 
-        elif choice == "6":
-            uncompleted_game = game_list.get_random_uncompleted_game()
-            if uncompleted_game:
-                print(Fore.CYAN + "Выбрана случайная не пройденная игра: " + Style.RESET_ALL + Fore.MAGENTA + f"{uncompleted_game.title}" + Style.RESET_ALL)
-            else:
-                print(Fore.YELLOW + "Все игры пройдены или список пуст." + Style.RESET_ALL)
+    def add_game(self):
+        title = simpledialog.askstring("Добавить игру", "Введите название игры:")
+        if title:
+            self.game_list.add_game(title)
 
-        elif choice == "7":
-            game_list.save_to_file(filename)
-            print(Fore.MAGENTA + "Программа завершена." + Style.RESET_ALL)
-            break
+    def mark_completed(self):
+        title = simpledialog.askstring("Отметить как пройденную", "Введите название игры, чтобы отметить как пройденную:")
+        if title:
+            self.game_list.mark_completed(title)
+
+    def display_list(self):
+        list_window = tk.Toplevel(self.root)
+        list_window.title("Список игр")
+        list_text = tk.Text(list_window)
+        list_text.pack()
+
+        sorted_games = self.game_list.sort_by_title()
+        for game in sorted_games:
+            status = "Пройдено" if game.completed else "Не пройдено"
+            list_text.insert(tk.END, f"- {game.title} ({status})\n")
+
+    def random_uncompleted_game(self):
+        uncompleted_game = self.game_list.get_random_uncompleted_game()
+        if uncompleted_game:
+            messagebox.showinfo("Случайная непройденная игра", f"Случайная непройденная игра: {uncompleted_game.title}")
         else:
-            print(Fore.RED + "Некорректный ввод. Пожалуйста, выберите действие из списка." + Style.RESET_ALL)
+            messagebox.showinfo("Случайная непройденная игра", "Все игры пройдены или список пуст.")
+
+    def save_and_quit(self):
+        self.game_list.save_to_file(self.filename)
+        messagebox.showinfo("Сохранение и выход", "Список игр сохранен.")
+        self.root.quit()
 
 if __name__ == "__main__":
-    main()
+    root = tk.Tk()
+    app = GameListApp(root)
+    root.mainloop()
